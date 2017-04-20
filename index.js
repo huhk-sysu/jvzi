@@ -7,7 +7,7 @@
 let app = require('express')()
 let request = require('superagent')
 let cheerio = require('cheerio')
-let fs = require('fs')
+// let fs = require('fs')
 
 app.get('/', (req, res) => {
   res.send('请用"http://localhost:3000/search/关键字"的方式来访问')
@@ -22,7 +22,7 @@ app.get('/search/:keyword', async (req, res, next) => {
   let goingOn = true
   while (goingOn) {
     console.log('page:' + page)
-    let response = await request.get(`http://www.juzimi.com/search/node/${encodedKeyword}%20type%3Asentence?page=${page}`).catch((err) => {
+    let response = await request.get(`http://www.juzimi.com/search/node/${encodedKeyword}%20type%3Asentence?page=${page}`).catch(() => {
       goingOn = false
       console.log('done')
     })
@@ -32,14 +32,13 @@ app.get('/search/:keyword', async (req, res, next) => {
       $('.views-field-phpcode').each(function (index, element) {
         let content = $(element).find('.views-field-phpcode-1').find('a').text()
         let temp = $(element).find('.xqjulistwafo').find('a')
-        let author
-        let source
-        if (temp.length == 2) {
+        let author, source
+        if (temp.length === 2) {
           author = temp.eq(0).text()
           source = temp.eq(1).text()
         } else {
           author = ''
-          source = temp.eq(0).text()
+          source = temp.eq(0).text() || ''
         }
         sentenceList.push({
           content,
@@ -50,7 +49,7 @@ app.get('/search/:keyword', async (req, res, next) => {
       ++page
     }
   }
-  fs.writeFileSync(`${keyword}.json`, JSON.stringify(sentenceList))
+  // fs.writeFileSync(`${keyword}.json`, JSON.stringify(sentenceList))
   res.json(sentenceList)
 })
 
